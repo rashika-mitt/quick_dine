@@ -3,6 +3,7 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import authRouter from "./routes/authRoutes.js";
+import restaurantRouter from "./routes/restaurantRoutes.js";
 
 // Load environment variables
 const result = dotenv.config({ path: "../.env" });
@@ -31,6 +32,7 @@ app.get("/", (req: Request, res: Response) => {
 
 // Auth routes
 app.use("/api/auth", authRouter);
+app.use("/api/restaurants", restaurantRouter);
 
 // Global error handler
 app.use(
