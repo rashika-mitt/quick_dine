@@ -4,9 +4,10 @@ import cors from "cors";
 import connectDB from "./config/db.js";
 import authRouter from "./routes/authRoutes.js";
 import restaurantRouter from "./routes/restaurantRoutes.js";
+import bookingRouter from "./routes/bookingRoutes.js";
 
 // Load environment variables
-const result = dotenv.config({ path: "../.env" });
+const result = dotenv.config();
 
 if (result.error) {
   console.error("Error loading .env file:", result.error.message);
@@ -33,6 +34,7 @@ app.get("/", (req: Request, res: Response) => {
 // Auth routes
 app.use("/api/auth", authRouter);
 app.use("/api/restaurants", restaurantRouter);
+app.use("/api/bookings", bookingRouter);
 
 // Global error handler
 app.use(

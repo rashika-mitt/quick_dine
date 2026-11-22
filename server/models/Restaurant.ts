@@ -120,8 +120,8 @@ const RestaurantSchema = new Schema<IRestaurant>(
     },
 
     totalSeats: {
-        types: Number,
-        default: 20
+        type: Number,
+        default: 20,
     },
   },
   {
