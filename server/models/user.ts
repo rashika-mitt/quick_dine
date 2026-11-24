@@ -1,3 +1,4 @@
+
 import { Schema, model, Document } from "mongoose";
 
 export interface IUser extends Document {
@@ -29,12 +30,21 @@ const userSchema = new Schema<IUser>(
     password: {
       type: String,
       required: true,
-      minlength: 8,
+      minlength: [8, "Password must be at least 8 characters long."],
+      match: [
+        /^(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/,
+        "Password must contain at least 8 characters, one number and one special character.",
+      ],
     },
 
     phone: {
       type: String,
       trim: true,
+      validate: {
+        validator: (value: string) =>
+          !value || /^\+[1-9]\d{7,14}$/.test(value),
+        message: "Please enter a valid international phone number.",
+      },
     },
 
     role: {

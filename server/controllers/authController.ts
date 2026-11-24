@@ -34,12 +34,31 @@ export const registerUser = async (
   res: Response
 ): Promise<void> => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone, role } = req.body;
 
     // Validate required fields
     if (!name || !email || !password) {
       res.status(400).json({
         message: "Please enter all required details",
+      });
+      return;
+    }
+
+    // Validate password
+    const passwordRegex = /^(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      res.status(400).json({
+        message:
+          "Password must contain at least 8 characters, one number and one special character.",
+      });
+      return;
+    }
+
+    // Validate phone number if provided
+    if (phone && !/^\+[1-9]\d{7,14}$/.test(phone)) {
+      res.status(400).json({
+        message: "Please enter a valid international phone number.",
       });
       return;
     }
@@ -68,8 +87,8 @@ export const registerUser = async (
       name: String(name).trim(),
       email: normalizedEmail,
       password: hashedPassword,
-      phone,
-      role: "user",
+      phone: phone || undefined,
+      role: role === "owner" ? "owner" : "user",
     });
 
     // Generate token
@@ -87,10 +106,18 @@ export const registerUser = async (
   } catch (error: any) {
     console.error("Register error:", error);
 
-    // Duplicate email error from MongoDB
+    // Duplicate email error
     if (error.code === 11000) {
       res.status(409).json({
         message: "Email already registered",
+      });
+      return;
+    }
+
+    // Mongoose validation error
+    if (error.name === "ValidationError") {
+      res.status(400).json({
+        message: error.message,
       });
       return;
     }
@@ -112,7 +139,6 @@ export const loginUser = async (
   try {
     const { email, password } = req.body;
 
-    // Validate required fields
     if (!email || !password) {
       res.status(400).json({
         message: "Please enter email and password",
@@ -120,15 +146,12 @@ export const loginUser = async (
       return;
     }
 
-    // Normalize email
     const normalizedEmail = String(email).trim().toLowerCase();
 
-    // Find user
     const user = await User.findOne({
       email: normalizedEmail,
     });
 
-    // Check user and password
     if (user && (await bcrypt.compare(password, user.password))) {
       const token = generateToken(user._id.toString());
 
@@ -167,7 +190,6 @@ export const getMe = async (
   try {
     const authReq = req as AuthRequest;
 
-    // Get user ID from authentication middleware
     const userId = authReq.user?.id || authReq.user?._id;
 
     if (!userId) {
@@ -177,7 +199,6 @@ export const getMe = async (
       return;
     }
 
-    // Find user and exclude password
     const user = await User.findById(userId).select("-password");
 
     if (!user) {
