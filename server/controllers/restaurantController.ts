@@ -12,7 +12,7 @@ export const getRestaurants = async (req:Request , res:Response) : Promise<void>
         const { search, priceRange, rating, location, sort} = req.query;
 
         // build query object
-        const queryObj:any = {status: "approved"};
+        const queryObj:any = {status: "Approved"};
 
         if(search){
             queryObj.$or = [
@@ -99,7 +99,7 @@ export const getRestaurantBySlug = async (req:Request , res:Response) : Promise<
                 }
             }
             if(!isAuthorized){
-                res.status(404).json({ message: "Restaurant not found or pending approved"});
+                res.status(404).json({ message: "Restaurant not found or pending Approved"});
                 return;
             }
         }
